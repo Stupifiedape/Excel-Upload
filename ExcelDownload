@@ -1,0 +1,824 @@
+class GE_SalesReport 
+{
+    SalesTable _SalesTable,_SalesTablesum,_SalesTablestore;
+    SalesLine _salesLine,_salesLinesum,_salesLinestore;
+    CustInvoiceJour custInvoiceJour;
+    CCAMonthly   CCAMonthly,CCAMonthly_loc;
+    InventLocationId locationId;
+    utcdatetime   SalesFromDate, SalesTodate;
+    InventLocation inventLocation;
+    InventItemGroupItem inventItemGroupItem;
+    RetailStoreTable RetailStoreTable;
+    InventTable                  inventTable,inventTable1,inventTable2,inventTable3,inventTable4;
+    EcoResProductAttributeValue  ecoResProductAttributeValue,ecoResProductAttributeValue1;
+    EcoResAttribute              ecoResAttribute,ecoResAttribute1;
+    EcoResValue                  ecoResValue,ecoResValue1;
+    EcoResProductCategory        ecoResProductCategory,ecoResProductCategory1,ecoResProductCategory3,ecoResProductCategory4;
+    EcoResCategory               ecoResCategory,ecoResCategory1,ecoResCategory3,ecoResCategory4;   
+    Transdate                   fromDate,todate;
+    CompanyId                   entitygrp;
+    str month,vendorNo,VName,StoreName,StoreCod,Descrip,ItemGrp,IFC,PCategory,Vcolour,Brand,Colour1,Colour2,Colour3,Disposibility,FrameType,Power,ProductType,Range,SizeIndex,
+        Style;
+    int year;
+    real Percentage;
+    InventItemPrice    inventitemprice;
+    int                discper;
+    custinvoicetrans   custinvoicetrans;
+  
+    EcoResCategoryId            parentCategory,parentCategory1;
+    List                                    li = new List(Types::String);
+    List                                    lis = new List(Types::String);
+    ListEnumerator                 enumer;
+   
+
+    public static void main(Args _args)
+    {
+        GE_SalesReport SalesReport = new GE_SalesReport();
+        SalesReport.dialog();
+        SalesReport.run();
+    }
+
+    public void Dialog()
+    {
+       
+
+        Dialog dialog;
+        dialog = new Dialog("Sales Report");
+        DialogField dlgfromDate,dlgtoDate;
+           
+        dlgfromDate = dialog.addField( extendedTypeStr(TransDate), 'FromDate' ); // from date
+        dlgtoDate = dialog.addField( extendedTypeStr(Transdate), 'ToDate' );     // To date
+      
+        dialog.run();
+
+        if (dialog.closedOk())
+        {
+            fromdate =  dlgfromDate.value();
+            Todate   =  dlgtoDate.value();    
+        }
+    }
+
+    public void run()
+    {
+        DocuFileSaveResult saveResult = DocuFileSave::promptForSaveLocation("SalesReport", "xlsx", null, "SalesReport");
+        if (saveResult && saveResult.parmAction() != DocuFileSaveAction::Cancel)
+        {
+            saveResult.parmOpenParameters('web=1');
+            saveResult.parmOpenInNewWindow(false);
+            System.IO.Stream workbookStream = new System.IO.MemoryStream();
+            System.IO.MemoryStream memoryStream = new System.IO.MemoryStream();
+
+            using (var package = new OfficeOpenXml.ExcelPackage(memoryStream))
+            {
+                var currentRow=1;
+                var worksheets = package.get_Workbook().get_Worksheets();
+                var worksheet = worksheets.Add("First sheet");
+                var cells = worksheet.get_Cells();
+
+                var cell = cells.get_Item(currentRow,1);
+                System.String value="Brand Type";
+                cell.set_Value(value);
+
+                cell=null;
+                value="Vendor No.";
+                cell=cells.get_Item(currentRow,2);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Name";
+                cell=cells.get_Item(currentRow,3);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Store Code";
+                cell=cells.get_Item(currentRow,4);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Store Name";
+                cell=cells.get_Item(currentRow,5);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Item No.";
+                cell=cells.get_Item(currentRow,6);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Description";
+                cell=cells.get_Item(currentRow,7);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Item Family Code";
+                cell=cells.get_Item(currentRow,8);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Division Code";
+                cell=cells.get_Item(currentRow,9);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Division Analysis";
+                cell=cells.get_Item(currentRow,10);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Item Category Code";
+                cell=cells.get_Item(currentRow,11);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Item Category";
+                cell=cells.get_Item(currentRow,12);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Product Group Code";
+                cell=cells.get_Item(currentRow,13);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Product Group";
+                cell=cells.get_Item(currentRow,14);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Vcolour";
+                cell=cells.get_Item(currentRow,15);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Brand";
+                cell=cells.get_Item(currentRow,16);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Colour 1";
+                cell=cells.get_Item(currentRow,17);
+                cell.set_Value(value);
+                
+                cell=null;
+                value="Colour 2";
+                cell=cells.get_Item(currentRow,18);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Colour 3";
+                cell=cells.get_Item(currentRow,19);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Disposibility";
+                cell=cells.get_Item(currentRow,20);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Frame Type";
+                cell=cells.get_Item(currentRow,21);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Frame Type Description";
+                cell=cells.get_Item(currentRow,22);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Power";
+                cell=cells.get_Item(currentRow,23);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Product Type";
+                cell=cells.get_Item(currentRow,24);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Range";
+                cell=cells.get_Item(currentRow,25);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Size _ Index";
+                cell=cells.get_Item(currentRow,26);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Style";
+                cell=cells.get_Item(currentRow,27);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Customer No.";
+                cell=cells.get_Item(currentRow,28);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Customer Age";
+                cell=cells.get_Item(currentRow,29);
+                cell.set_Value(value);
+                                
+                cell=null;
+                value="Transaction No.";
+                cell=cells.get_Item(currentRow,31);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Bill Type";
+                cell=cells.get_Item(currentRow,32);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Unit Cost";
+                cell=cells.get_Item(currentRow,33);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Unit Price";
+                cell=cells.get_Item(currentRow,34);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Sales Quantity";
+                cell=cells.get_Item(currentRow,35);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Manual Order No.";
+                cell=cells.get_Item(currentRow,36);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Ref Order No.";
+                cell=cells.get_Item(currentRow,37);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Opto Code";
+                cell=cells.get_Item(currentRow,38);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Internal Doctor";
+                cell=cells.get_Item(currentRow,39);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Extra Features";
+                cell=cells.get_Item(currentRow,40);
+                cell.set_Value(value);
+
+                cell=null;
+                value="MRP-Discount";
+                cell=cells.get_Item(currentRow,41);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Discount";
+                cell=cells.get_Item(currentRow,42);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Periodic Disc_ Group";
+                cell=cells.get_Item(currentRow,43);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Amount Excluding Tax";
+                cell=cells.get_Item(currentRow,43);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Cost Amount";
+                cell=cells.get_Item(currentRow,44);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Margin";
+                cell=cells.get_Item(currentRow,45);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Margin %";
+                cell=cells.get_Item(currentRow,46);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Total Store Sales";
+                cell=cells.get_Item(currentRow,47);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Total All Stores Sales";
+                cell=cells.get_Item(currentRow,48);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Store Stock";
+                cell=cells.get_Item(currentRow,49);
+                cell.set_Value(value);
+
+                cell=null;
+                value="All Store Stock";
+                cell=cells.get_Item(currentRow,50);
+                cell.set_Value(value);
+
+                cell=null;
+                value="First Purchase Date";
+                cell=cells.get_Item(currentRow,51);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Last Purchase Date";
+                cell=cells.get_Item(currentRow,52);
+                cell.set_Value(value);
+
+                cell=null;
+                value="First Transfer Date";
+                cell=cells.get_Item(currentRow,53);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Last Transfer Date";
+                cell=cells.get_Item(currentRow,54);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Sales Staff";
+                cell=cells.get_Item(currentRow,56);
+                cell.set_Value(value);
+
+                cell=null;
+                value="CCA Name";
+                cell=cells.get_Item(currentRow,57);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Transation Date";
+                cell=cells.get_Item(currentRow,58);
+                cell.set_Value(value);
+
+                cell=null;
+                value="Scheme";
+                cell=cells.get_Item(currentRow,59);
+                cell.set_Value(value);
+
+                cell=null;
+                value="OPTOM";
+                cell=cells.get_Item(currentRow,60);
+                cell.set_Value(value);
+
+                cell=null;
+                value="OPTOM Name";
+                cell=cells.get_Item(currentRow,61);
+                cell.set_Value(value);
+
+                
+                cell=null;
+                value="Is Spectacle";
+                cell=cells.get_Item(currentRow,62);
+                cell.set_Value(value);
+
+               
+                while select  CustInvoiceTrans
+                    where CustInvoiceTrans.InvoiceDate >= fromdate
+                     &&  CustInvoiceTrans.InvoiceDate <= todate                  
+                  
+                {
+                    currentRow ++;
+                    cell=null;
+
+                    Select * From _SalesTable where _SalesTable.SalesId ==CustInvoiceTrans.SalesId
+                        join _salesLine where _salesLine.SalesId == _SalesTable.SalesId;
+                   
+
+                    cell=cells.get_Item(currentRow,1);
+                    cell.set_Value(_SalesTable.InventLocationId);
+                    cell=null;
+
+                    vendorNo = InventTable::find(_salesLine.ItemId).PrimaryVendorId; // vendorNo
+
+                    cell=cells.get_Item(currentRow,2);
+                    cell.set_Value(vendorNo);
+                    cell=null;
+
+                    VName = VendTable::find(vendorNo).name();//Vendor Name
+
+                    cell=cells.get_Item(currentRow,3);
+                    cell.set_Value(VName);
+                    cell=null;
+
+                    StoreCod = _SalesTable.getRetailChannelName();
+                    cell=cells.get_Item(currentRow,4); //StoreCode
+                    cell.set_Value(StoreCod);
+                    cell=null;
+
+                    StoreName = RetailStoreTable::find(StoreCod).name();
+                    cell=cells.get_Item(currentRow,5);  //StoreName
+                    cell.set_Value(StoreName);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,6); //itemId
+                    cell.set_Value(_salesLine.ItemId);
+                    cell=null;
+
+                    Descrip = InventTable::find(_salesLine.ItemId).NameAlias; //Description
+                    cell=cells.get_Item(currentRow,7);
+                    cell.set_Value(Descrip);
+                    cell=null;
+
+                    ///Item Family Code///
+
+                    select inventTable1 index ItemIdx where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Item Family Code';
+                    IFC = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,8);
+                    cell.set_Value(IFC);
+                    cell=null;
+                    
+                    select * from EcoResCategory
+                  join RecId from EcoResProductCategory
+                       where EcoResCategory.RecId == EcoResProductCategory.Category
+                     && EcoResProductCategory.Product == InventTable::find(_salesLine.ItemId).Product;
+                        
+
+                    parentCategory = EcoResCategory.ParentCategory;      
+
+                    while (parentCategory)
+                    {
+                        li.addStart(EcoResCategory.Name);
+
+                        select * from EcoResCategory
+            where EcoResCategory.RecId ==  parentCategory
+            && EcoResCategory.ParentCategory != 0;  // skip the top node
+
+                        parentCategory = EcoResCategory.ParentCategory;
+                    }
+
+                    container con = list2Con(li);
+                    str Level4 = conPeek(con,1);
+                    str level3 = conPeek(con,2);
+                    str level2 = conPeek(con,3);
+            
+
+                          
+
+                    select * from EcoResCategory1
+        join RecId from EcoResProductCategory1
+            where EcoResCategory1.RecId == EcoResProductCategory1.Category
+            && EcoResProductCategory1.Product == InventTable::find(_salesLine.ItemId).Product;
+
+       
+
+                    parentCategory1 = EcoResCategory1.ParentCategory;
+
+      
+
+                    while (parentCategory1)
+                    {
+                        lis.addStart(EcoResCategory1.Name);
+
+                        select * from EcoResCategory1
+            where EcoResCategory1.RecId ==  parentCategory1
+            && EcoResCategory1.ParentCategory != 0;  // skip the top node
+
+                        parentCategory1 = EcoResCategory1.ParentCategory;
+                    }
+
+                    container con1 = list2Con(lis);
+                    str Code4 = conPeek(con1,1);
+                    str Code3= conPeek(con1,2);
+                    str code2 = conPeek(con1,3);
+
+
+                    ItemGrp = inventItemGroupItem.ItemGroupId;
+                    cell=cells.get_Item(currentRow,9);
+                    cell.set_Value(code4);
+                    cell=null;
+
+
+                    cell=cells.get_Item(currentRow,10);
+                    cell.set_Value(level4);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,11); //Division Analysis
+                    cell.set_Value(Code3);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,12); 
+                    cell.set_Value(level3);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,13);
+                    cell.set_Value(code2);
+                    cell=null;                    
+
+                    cell=cells.get_Item(currentRow,14);
+                    cell.set_Value(Level2);
+                    cell=null;
+                                       
+
+                    select inventTable1  where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Vcolour';
+                    Vcolour = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,15);//Vcolour
+                    cell.set_Value(Vcolour);
+                    cell=null;
+
+                    select inventTable1 where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Brand';
+                    Brand = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,16);//Brand
+                    cell.set_Value(Brand);
+                    cell=null;
+
+                    select inventTable1 where  inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Colour1';
+                    Colour1 = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,17);//Colour1
+                    cell.set_Value(Colour1);
+                    cell=null;
+
+                    select inventTable1  where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Colour2';
+                    Colour2 = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,18);//Colour2
+                    cell.set_Value(Colour2);
+                    cell=null;
+
+                    select inventTable1  where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Colour3';
+                    Colour3 = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,19);//Colour3
+                    cell.set_Value(Colour3);
+                    cell=null;
+
+                    select inventTable1  where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Disposibility';
+                    Disposibility = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,20);//Disposibility
+                    cell.set_Value(Disposibility);
+                    cell=null;
+
+                    select inventTable1 where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Frame Type';
+                    FrameType = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,21);//Frame Type
+                    cell.set_Value(FrameType);
+                    cell=null;
+
+                    select inventTable1  where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Colour3';
+                    Colour3 = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,22);//Colour3///////////////need
+                    cell.set_Value(Colour3);
+                    cell=null;
+
+                    select inventTable1  where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Power';
+                    Power = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,23);//Power 
+
+                    cell.set_Value(Power);
+                    cell=null;
+
+                    select inventTable1  where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Product Type';
+                    ProductType = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,24);//Product Type
+                    cell.set_Value(ProductType);
+                    cell=null;
+
+                    select inventTable1 where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Range';
+                    Range = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,25);//Range
+                    cell.set_Value(Range);
+                    cell=null;
+
+                    select inventTable1  where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Size _ Index';
+                    SizeIndex = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,26);//SizeIndex
+                    cell.set_Value(SizeIndex);
+                    cell=null;
+
+                    select inventTable1  where inventTable1.itemid == _salesLine.ItemId
+                            join RecId from ecoResProductAttributeValue1
+                            where ecoResProductAttributeValue1.Product == inventTable1.Product
+                            join Name from ecoResAttribute1
+                            where ecoResProductAttributeValue1.Attribute == ecoResAttribute1.RecId
+                            join ecoResValue1
+                            where ecoResValue1.RecId == ecoResProductAttributeValue1.Value
+                                && ecoResAttribute1.name=='Style';
+                    Style = ecoResValue1.value();
+                    cell=cells.get_Item(currentRow,27);//Style
+                    cell.set_Value(Style);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,28);//Customer No.
+                    cell.set_Value(_SalesTable.CustAccount);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,29);//Customer No.
+                    cell.set_Value(CustTable::find(_SalesTable.CustAccount).AgeGroup);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,30);//Customer No.
+                    cell.set_Value(0);
+                    cell=null;
+
+
+                    cell=cells.get_Item(currentRow,31);//Customer No.
+                    cell.set_Value(_SalesTable.SalesId);
+                    cell=null;
+
+
+                    cell=cells.get_Item(currentRow,32);//Customer No.
+                    cell.set_Value(GESalesTable::find(_SalesTable.RecId).SpectacialType);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,33);//Customer No.
+                    cell.set_Value(_salesLine.SalesPrice);
+                    cell=null;
+
+                    select firstonly InventItemPrice order by ActivationDate desc
+                        where InventItemPrice.ItemId ==_salesLine.ItemId;
+
+                    cell=cells.get_Item(currentRow,33);//Customer No.
+                    cell.set_Value(InventItemPrice.price);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,34);//Customer No.
+                    cell.set_Value(_salesLine.SalesPrice);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,35);//Customer No.
+                    cell.set_Value(_salesLine.SalesQty);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,36);//Customer No.
+                    cell.set_Value(GESalesTable::find(_SalesTable.RecId).ManualOrderNo);
+                    cell=null;
+
+                    
+
+                    cell=cells.get_Item(currentRow,37);//Customer No.
+                    cell.set_Value(" code");
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,38);//Customer No.
+                    cell.set_Value(GESalesTable::find(_SalesTable.RecId).EyeTestDoneby);
+                    cell=null;
+
+                   
+                    cell=cells.get_Item(currentRow,40);//Customer No.
+                    cell.set_Value(_SalesLine.LineDisc);
+                    cell=null;
+              
+                  
+                    if(_SalesLine.LineDisc!=0)
+                    {
+                        discper = ((_SalesLine.LineDisc/_SalesLine.SalesPrice)*100);
+                        cell=cells.get_Item(currentRow,41);//Customer No.
+                        cell.set_Value(discper);
+                        cell=null;
+                    }
+
+                    cell=cells.get_Item(currentRow,43);//Customer No.
+                    cell.set_Value(_SalesLine.LineAmount);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,44);//Customer No.
+                    cell.set_Value(InventItemPrice.price);
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,45);//Customer No.
+                    cell.set_Value(CustInvoiceTrans.LineAmount-InventItemPrice.price);
+                    cell=null;
+  
+                     select  sum(LineAmount) from  _salesLinesum where _salesLinesum.ItemId== _SalesLine.ItemId                        
+                      join  _SalesTablesum where _SalesTablesum.SalesId == _salesLinesum.SalesId
+                        &&  _SalesTablesum.SalesStatus == salesstatus::Invoiced
+                        &&  _SalesTablesum.InventLocationId ==_SalesTable.InventLocationId;
+                     
+                    
+                    cell=cells.get_Item(currentRow,47);//Customer No.
+                    cell.set_Value(_salesLinesum.LineAmount);
+                    cell=null;
+                    
+                    select  sum(LineAmount) from _saleslinestore where _salesLinestore.ItemId== _SalesLine.ItemId
+                      join  _SalesTablestore where _SalesTablestore.SalesId == _salesLinestore.SalesId
+                        &&  _SalesTablestore.SalesStatus == salesstatus::Invoiced;
+                   
+                    cell=cells.get_Item(currentRow,48);//Customer No.
+                    cell.set_Value(_saleslinestore.LineAmount);
+                    cell=null;
+
+
+                    cell=cells.get_Item(currentRow,56);//Customer No.
+                    cell.set_Value(_SalesTable.SalesGroup);
+                    cell=null;
+
+
+
+
+                    cell=cells.get_Item(currentRow,57);//Customer No.
+                    cell.set_Value((CommissionSalesGroup::find(_SalesTable.SalesGroup).Name));
+                    cell=null;
+
+                    cell=cells.get_Item(currentRow,58);//Customer No.
+                   // cell.set_Value((custInvoiceJour.InvoiceDate));
+                    cell.set_Value(date2Str(custInvoiceJour.InvoiceDate,123,DateDay::Digits2,DateSeparator::Hyphen,DateMonth::Digits2,DateSeparator::Hyphen,DateYear::Digits4));
+                    cell=null;
+
+
+
+                }
+                package.Save();
+            }
+            memoryStream.Seek(0, System.IO.SeekOrigin::Begin);
+            DocuFileSave::processSaveResult(memoryStream, saveResult);
+        }
+    }
+
+}
